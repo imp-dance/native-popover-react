@@ -1,6 +1,6 @@
 # native-popover-react
 
-> Utilize the native HTML popover API with React
+> Utilize the [native web Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) with React
 
 ```tsx
 <NativePopover
