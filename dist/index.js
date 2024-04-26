@@ -25,10 +25,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.usePopoverControls = exports.NativePopover = void 0;
 const react_1 = __importStar(require("react"));
-let i = 0;
-function generateId() {
-    return `popover-${i++}`;
-}
 function NativePopover(props) {
     var _a;
     const id = (0, react_1.useRef)(generateId());
@@ -36,9 +32,7 @@ function NativePopover(props) {
         id.current = props.id;
     }
     return (react_1.default.createElement(react_1.default.Fragment, null,
-        props.trigger
-            ? props.trigger({ popovertarget: id.current })
-            : null,
+        props.trigger({ popovertarget: id.current }),
         props.popover({
             id: id.current,
             popover: (_a = props.type) !== null && _a !== void 0 ? _a : "auto",
@@ -49,67 +43,89 @@ function NativePopover(props) {
         })));
 }
 exports.NativePopover = NativePopover;
-function usePopoverControls(options = {}) {
+function usePopoverControls() {
     const ref = (0, react_1.useRef)(null);
+    const listenerRegistered = (0, react_1.useRef)(false);
     const [isOpen, setIsOpen] = (0, react_1.useState)(false);
     const show = () => {
         if (!supportsPopover()) {
-            return console.error("Popover API is not supported in your browser");
+            return apiSupportWarning();
         }
         if (ref.current && "showPopover" in ref.current) {
             ref.current.showPopover();
         }
         else {
-            console.error("Target element is not mounted, or does not support popover API");
+            return noRefWarning();
         }
     };
     const hide = () => {
         if (!supportsPopover()) {
-            return console.error("Popover API is not supported in your browser");
+            return apiSupportWarning();
         }
         if (ref.current && "hidePopover" in ref.current) {
             ref.current.hidePopover();
         }
         else {
-            console.error("Target element is not mounted, or does not support popover API");
+            return noRefWarning();
         }
     };
     const toggle = () => {
         if (!supportsPopover()) {
-            return console.error("Popover API is not supported in your browser");
+            return apiSupportWarning();
         }
         if (ref.current && "togglePopover" in ref.current) {
             ref.current.togglePopover();
         }
         else {
-            console.error("Target element is not mounted, or does not support popover API");
+            return noRefWarning();
+        }
+    };
+    const beforeToggle = (0, react_1.useCallback)((event) => {
+        if ("newState" in event && event.newState === "open") {
+            setIsOpen(true);
+        }
+        if ("newState" in event && event.newState === "closed") {
+            setIsOpen(false);
+        }
+    }, [setIsOpen]);
+    const refApplier = (element) => {
+        if (element) {
+            ref.current = element;
+            listenerRegistered.current = true;
+            element.addEventListener("beforetoggle", beforeToggle);
         }
     };
     (0, react_1.useEffect)(() => {
         if (ref.current) {
             setIsOpen(ref.current.matches(":popover-open"));
-            ref.current.addEventListener("beforetoggle", (event) => {
-                var _a, _b;
-                if ("newState" in event && event.newState === "open") {
-                    setIsOpen(true);
-                    (_a = options.onStateChange) === null || _a === void 0 ? void 0 : _a.call(options, "open");
-                }
-                if ("newState" in event && event.newState === "closed") {
-                    setIsOpen(false);
-                    (_b = options.onStateChange) === null || _b === void 0 ? void 0 : _b.call(options, "closed");
-                }
-            });
+            ref.current.addEventListener("beforetoggle", beforeToggle);
         }
+        return () => {
+            if (ref.current && listenerRegistered.current) {
+                ref.current.removeEventListener("beforetoggle", beforeToggle);
+            }
+        };
     }, []);
     return {
         show,
         hide,
         toggle,
-        control: ref,
+        control: refApplier,
         isOpen,
     };
 }
 exports.usePopoverControls = usePopoverControls;
+function apiSupportWarning() {
+    console.warn("Popover API is not supported in your browser");
+}
+function noRefWarning() {
+    console.warn("Ref is not registered, popover controls will not work");
+}
 function supportsPopover() {
+    // eslint-disable-next-line no-prototype-builtins
     return HTMLElement.prototype.hasOwnProperty("popover");
+}
+let i = 0;
+function generateId() {
+    return `popover-${i++}`;
 }

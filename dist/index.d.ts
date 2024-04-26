@@ -1,26 +1,24 @@
 import React from "react";
 export declare function NativePopover<T extends HTMLElement = HTMLElement>(props: {
-    trigger?: (props: {
+    trigger: (props: {
         popovertarget: string;
     }) => React.ReactNode;
     popover: (props: {
         id: string;
         popover: string;
-        ref?: React.MutableRefObject<T | null>;
+        ref?: (element: T | null) => void;
     }, closeProps: {
         popovertarget: string;
         popovertargetaction: string;
     }) => React.ReactNode;
     type?: "auto" | "manual";
     id?: string;
-    control?: React.MutableRefObject<T | null>;
+    control?: (element: T | null) => void;
 }): React.JSX.Element;
-export declare function usePopoverControls<T extends HTMLElement = HTMLElement>(options?: {
-    onStateChange?: (newState: "open" | "closed") => void;
-}): {
+export declare function usePopoverControls<T extends HTMLElement = HTMLElement>(): {
     show: () => void;
     hide: () => void;
     toggle: () => void;
-    control: React.MutableRefObject<T | null>;
+    control: (element: T | null) => void;
     isOpen: boolean;
 };

@@ -1,6 +1,6 @@
 {
   "name": "native-popover-react",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Native HTML popover in the form of a React component",
   "main": "dist/index.js",
   "exports": {
