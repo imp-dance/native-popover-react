@@ -1,6 +1,6 @@
 # native-popover-react
 
-> Utilize the [native web Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) with React
+> Utilize the [native web Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) in React
 
 ```tsx
 import { NativePopover } from "native-popover-react";
@@ -50,43 +50,57 @@ function App() {
 }
 ```
 
-## Reference
+### Closing popover
 
-```typescript
-function NativePopover<
-  T extends HTMLElement = HTMLElement
->(props: {
-  /** Spread props on a container for the popover content. **/
-  popover: (
-    props: {
-      id: string;
-      popover: string;
-      ref?: React.MutableRefObject<T | null>;
-    },
-    closeProps: {
-      popovertarget: string;
-      popovertargetaction: string;
-    }
-  ) => React.ReactNode;
-  /** Props should be applied to a `button` or `input` element **/
-  trigger?: (props: {
-    popovertarget: string;
-  }) => React.ReactNode;
-  type?: "auto" | "manual";
-  id?: string;
-  /** Returned from `usePopoverControls().control` **/
-  control?: React.MutableRefObject<T | null>;
-}): ReactNode;
+You can close the popover using `usePopoverControls`, or by utilizing the second argument in the `popover` prop to create a close button:
 
-function usePopoverControls<
-  T extends HTMLElement = HTMLElement
->(options?: {
-  onStateChange?: (newState: "open" | "closed") => void;
-}): {
-  show: () => void;
-  hide: () => void;
-  toggle: () => void;
-  control: React.MutableRefObject<T | null>;
-  isOpen: boolean;
-};
+```tsx
+<NativePopover
+  trigger={(props) => <button {...props}>Toggle</button>}
+  popover={(props, closeProps) => (
+    <div {...props} className="my-popover">
+      Popover content
+      <button {...closeProps}>X</button>
+    </div>
+  )}
+/>
+```
+
+## Anchoring
+
+> [!WARNING]  
+> **Experimental**: This might not be supported in all modern browsers yet.
+
+Enable an [anchor](https://developer.chrome.com/blog/introducing-popover-api#anchor_positioning) between `trigger` and `popover`.
+
+```tsx
+import {
+  NativePopover,
+  usePopoverControls,
+} from "native-popover-react";
+
+function App() {
+  const popover = usePopoverControls<HTMLDivElement>();
+
+  return (
+    <div>
+      <NativePopover
+        anchor
+        control={popover.control}
+        trigger={(props) => <button {...props}>Toggle</button>}
+        popover={(props) => (
+          <div
+            {...props}
+            style={{
+              bottom: "anchor(bottom)",
+              left: "anchor(center)",
+            }}
+          >
+            Popover content
+          </div>
+        )}
+      />
+    </div>
+  );
+}
 ```

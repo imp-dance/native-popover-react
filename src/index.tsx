@@ -8,12 +8,16 @@ import React, {
 export function NativePopover<
   T extends HTMLElement = HTMLElement
 >(props: {
-  trigger: (props: { popovertarget: string }) => React.ReactNode;
+  trigger: (props: {
+    popovertarget: string;
+    id: string;
+  }) => React.ReactNode;
   popover: (
     props: {
       id: string;
       popover: string;
       ref?: (element: T | null) => void;
+      anchor?: string;
     },
     closeProps: {
       popovertarget: string;
@@ -23,19 +27,25 @@ export function NativePopover<
   type?: "auto" | "manual";
   id?: string;
   control?: (element: T | null) => void;
+  anchor?: boolean;
 }) {
+  const anchorId = useRef(generateId());
   const id = useRef(generateId());
   if (props.id) {
     id.current = props.id;
   }
   return (
     <>
-      {props.trigger({ popovertarget: id.current })}
+      {props.trigger({
+        popovertarget: id.current,
+        id: anchorId.current,
+      })}
       {props.popover(
         {
           id: id.current,
           popover: props.type ?? "auto",
           ref: props.control,
+          anchor: props.anchor ? anchorId.current : undefined,
         },
         {
           popovertarget: id.current,
@@ -55,34 +65,46 @@ export function usePopoverControls<
 
   const show = () => {
     if (!supportsPopover()) {
-      return apiSupportWarning();
+      return console.error(
+        "Popover API is not supported in your browser"
+      );
     }
     if (ref.current && "showPopover" in ref.current) {
       ref.current.showPopover();
     } else {
-      return noRefWarning();
+      console.error(
+        "Target element is not mounted, or does not support popover API"
+      );
     }
   };
 
   const hide = () => {
     if (!supportsPopover()) {
-      return apiSupportWarning();
+      return console.error(
+        "Popover API is not supported in your browser"
+      );
     }
     if (ref.current && "hidePopover" in ref.current) {
       ref.current.hidePopover();
     } else {
-      return noRefWarning();
+      console.error(
+        "Target element is not mounted, or does not support popover API"
+      );
     }
   };
 
   const toggle = () => {
     if (!supportsPopover()) {
-      return apiSupportWarning();
+      return console.error(
+        "Popover API is not supported in your browser"
+      );
     }
     if (ref.current && "togglePopover" in ref.current) {
       ref.current.togglePopover();
     } else {
-      return noRefWarning();
+      console.error(
+        "Target element is not mounted, or does not support popover API"
+      );
     }
   };
 
@@ -128,16 +150,6 @@ export function usePopoverControls<
     control: refApplier,
     isOpen,
   };
-}
-
-function apiSupportWarning() {
-  console.warn("Popover API is not supported in your browser");
-}
-
-function noRefWarning() {
-  console.warn(
-    "Ref is not registered, popover controls will not work"
-  );
 }
 
 function supportsPopover() {
