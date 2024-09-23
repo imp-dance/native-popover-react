@@ -74,30 +74,19 @@ You can close the popover using `usePopoverControls`, or by utilizing the second
 Enable an [anchor](https://developer.chrome.com/blog/introducing-popover-api#anchor_positioning) between `trigger` and `popover`.
 
 ```tsx
-import {
-  NativePopover,
-  usePopoverControls,
-} from "native-popover-react";
+import { NativePopover } from "native-popover-react";
 
 function App() {
-  const popover = usePopoverControls<HTMLDivElement>();
-
   return (
     <div>
       <NativePopover
-        anchor
-        control={popover.control}
+        anchor={{
+          top: "bottom", // top of popover aligned to bottom of trigger
+          left: "right", // left of popover aligned to right of trigger
+        }}
         trigger={(props) => <button {...props}>Toggle</button>}
         popover={(props) => (
-          <div
-            {...props}
-            style={{
-              bottom: "anchor(bottom)",
-              left: "anchor(center)",
-            }}
-          >
-            Popover content
-          </div>
+          <div {...props}>Popover content</div>
         )}
       />
     </div>
