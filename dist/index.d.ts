@@ -16,7 +16,12 @@ export declare function NativePopover<T extends HTMLElement = HTMLElement>(props
     type?: "auto" | "manual";
     id?: string;
     control?: (element: T | null) => void;
-    anchor?: boolean;
+    anchor?: {
+        top?: "top" | "bottom";
+        bottom?: "top" | "bottom";
+        left?: "left" | "right";
+        right?: "left" | "right";
+    };
 }): React.JSX.Element;
 export declare function usePopoverControls<T extends HTMLElement = HTMLElement>(args?: {
     throwOnError?: boolean;

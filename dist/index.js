@@ -27,22 +27,46 @@ exports.browserSupportsPopover = exports.registerPopoverListener = exports.usePo
 const react_1 = __importStar(require("react"));
 function NativePopover(props) {
     var _a;
-    const anchorId = (0, react_1.useRef)(generateId());
-    const id = (0, react_1.useRef)(generateId());
+    const anchorId = useIncrID();
+    const id = useIncrID();
     if (props.id) {
         id.current = props.id;
     }
+    const anchorName = `--anchor${anchorId.current}`;
+    const triggerProps = {
+        popovertarget: id.current,
+        id: anchorId.current,
+    };
+    if (props.anchor) {
+        triggerProps.style = { anchorName };
+    }
+    const popoverProps = {
+        id: id.current,
+        popover: (_a = props.type) !== null && _a !== void 0 ? _a : "auto",
+        ref: props.control,
+        anchor: props.anchor ? anchorId.current : undefined,
+    };
+    if (props.anchor) {
+        popoverProps.style = {
+            positionAnchor: anchorName,
+            top: props.anchor.top
+                ? `anchor(${anchorName} ${props.anchor.top})`
+                : undefined,
+            bottom: props.anchor.bottom
+                ? `anchor(${anchorName} ${props.anchor.bottom})`
+                : undefined,
+            left: props.anchor.left
+                ? `anchor(${anchorName} ${props.anchor.left})`
+                : undefined,
+            right: props.anchor.right
+                ? `anchor(${anchorName} ${props.anchor.right})`
+                : undefined,
+            margin: 0,
+        };
+    }
     return (react_1.default.createElement(react_1.default.Fragment, null,
-        props.trigger({
-            popovertarget: id.current,
-            id: anchorId.current,
-        }),
-        props.popover({
-            id: id.current,
-            popover: (_a = props.type) !== null && _a !== void 0 ? _a : "auto",
-            ref: props.control,
-            anchor: props.anchor ? anchorId.current : undefined,
-        }, {
+        props.trigger(triggerProps),
+        props.popover(popoverProps, {
             popovertarget: id.current,
             popovertargetaction: "hide",
         })));
@@ -141,6 +165,7 @@ function browserSupportsPopover() {
 }
 exports.browserSupportsPopover = browserSupportsPopover;
 let i = 0;
-function generateId() {
-    return `popover-${i++}`;
+function useIncrID() {
+    const [id] = (0, react_1.useState)(() => ({ current: `npopoverr${i++}` }));
+    return id;
 }

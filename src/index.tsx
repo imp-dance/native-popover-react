@@ -1,4 +1,5 @@
 import React, {
+  CSSProperties,
   useCallback,
   useEffect,
   useRef,
@@ -27,31 +28,71 @@ export function NativePopover<
   type?: "auto" | "manual";
   id?: string;
   control?: (element: T | null) => void;
-  anchor?: boolean;
+  anchor?: {
+    top?: "top" | "bottom";
+    bottom?: "top" | "bottom";
+    left?: "left" | "right";
+    right?: "left" | "right";
+  };
 }) {
-  const anchorId = useRef(generateId());
-  const id = useRef(generateId());
+  const anchorId = useIncrID();
+  const id = useIncrID();
   if (props.id) {
     id.current = props.id;
   }
+
+  const anchorName = `--anchor${anchorId.current}`;
+
+  const triggerProps: {
+    popovertarget: string;
+    id: string;
+    style?: CSSProperties;
+  } = {
+    popovertarget: id.current,
+    id: anchorId.current,
+  };
+  if (props.anchor) {
+    triggerProps.style = { anchorName } as CSSProperties;
+  }
+
+  const popoverProps: {
+    id: string;
+    popover: string;
+    ref?: (element: T | null) => void;
+    anchor?: string;
+    style?: CSSProperties;
+  } = {
+    id: id.current,
+    popover: props.type ?? "auto",
+    ref: props.control,
+    anchor: props.anchor ? anchorId.current : undefined,
+  };
+  if (props.anchor) {
+    popoverProps.style = {
+      positionAnchor: anchorName,
+      top: props.anchor.top
+        ? `anchor(${anchorName} ${props.anchor.top})`
+        : undefined,
+      bottom: props.anchor.bottom
+        ? `anchor(${anchorName} ${props.anchor.bottom})`
+        : undefined,
+      left: props.anchor.left
+        ? `anchor(${anchorName} ${props.anchor.left})`
+        : undefined,
+      right: props.anchor.right
+        ? `anchor(${anchorName} ${props.anchor.right})`
+        : undefined,
+      margin: 0,
+    } as CSSProperties;
+  }
+
   return (
     <>
-      {props.trigger({
+      {props.trigger(triggerProps)}
+      {props.popover(popoverProps, {
         popovertarget: id.current,
-        id: anchorId.current,
+        popovertargetaction: "hide",
       })}
-      {props.popover(
-        {
-          id: id.current,
-          popover: props.type ?? "auto",
-          ref: props.control,
-          anchor: props.anchor ? anchorId.current : undefined,
-        },
-        {
-          popovertarget: id.current,
-          popovertargetaction: "hide",
-        }
-      )}
     </>
   );
 }
@@ -175,6 +216,7 @@ export function browserSupportsPopover() {
 }
 
 let i = 0;
-function generateId() {
-  return `popover-${i++}`;
+function useIncrID() {
+  const [id] = useState(() => ({ current: `npopoverr${i++}` }));
+  return id;
 }
